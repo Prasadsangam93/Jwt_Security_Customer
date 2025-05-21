@@ -11,4 +11,6 @@ public interface CustomerService {
     JwtResponse loginCustomer(LoginRequest request);
 
     List<Customer> getAllCustomers();
+
+    Customer getByCustomerId(Long customerId);
 }

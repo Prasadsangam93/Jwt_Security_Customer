@@ -1,19 +1,15 @@
 package com.CustomerJwt.entity;
 
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "customer_jwt")
 @Entity
+@Table(name = "customer_jwt")
 public class Customer {
-
 
         @Id
         @GeneratedValue(strategy = GenerationType.AUTO)
@@ -27,8 +23,7 @@ public class Customer {
         @JsonIgnore
         @Column(nullable = false)
         private String password;
-    }
 
-
-
-
+        @Column(nullable = false)
+        private String role; // Example: ROLE_USER or ROLE_ADMIN
+}

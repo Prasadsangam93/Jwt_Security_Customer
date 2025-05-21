@@ -1,7 +1,5 @@
 package com.CustomerJwt.service;
 
-
-
 import com.CustomerJwt.dto.JwtResponse;
 import com.CustomerJwt.dto.LoginRequest;
 import com.CustomerJwt.dto.RegisterRequest;
@@ -16,10 +14,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CustomerServiceImpl implements CustomerService {
-
 
     @Autowired
     private CustomerRepository customerRepository;
@@ -34,13 +32,14 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public String registerCustomer(RegisterRequest request) {
-        if (customerRepository.findByCustomerMail(request.getEmail()).isPresent()) {
+        if (customerRepository.findByCustomerMail(request.getCustomerMail()).isPresent()) {
             throw new RuntimeException("Email already exists");
         }
         Customer customer = new Customer();
-        customer.setCustomerName(request.getName());
-        customer.setCustomerMail(request.getEmail());
+        customer.setCustomerName(request.getCustomerMail());
+        customer.setCustomerMail(request.getCustomerMail());
         customer.setPassword(passwordEncoder.encode(request.getPassword()));
+        customer.setRole(request.getRole());
         customerRepository.save(customer);
         return "Customer registered successfully";
     }
@@ -50,7 +49,7 @@ public class CustomerServiceImpl implements CustomerService {
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
-                            request.getEmail(),
+                            request.getCustomerMail(),
                             request.getPassword()
                     )
             );
@@ -59,14 +58,28 @@ public class CustomerServiceImpl implements CustomerService {
         }
 
         UserDetails userDetails = customerUserDetailsService
-                .loadUserByUsername(request.getEmail());
+                .loadUserByUsername(request.getCustomerMail());
 
-        String token = jwtUtil.generateToken(userDetails.getUsername());
-        return new JwtResponse(token);
+        String accessToken = jwtUtil.generateToken(userDetails.getUsername());
+        String refreshToken = jwtUtil.generateRefreshToken(userDetails.getUsername());
+
+        return new JwtResponse(accessToken, refreshToken);
     }
 
     @Override
     public List<Customer> getAllCustomers() {
         return customerRepository.findAll();
+    }
+
+    @Override
+    public Customer getByCustomerId(Long customerId) {
+        Optional<Customer> customer = customerRepository.findById(customerId);
+        if (customer.isPresent()){
+            return customer.get();
+        }else{
+
+            return  null;
+        }
+
     }
 }
